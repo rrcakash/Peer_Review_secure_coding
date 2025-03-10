@@ -14,7 +14,7 @@ def get_user_input():
     return re.sub(r'[^a-zA-Z0-9 ]', '', user_input)
 
 def send_email(to, subject, body):
-    os.system(f'echo {body} | mail -s "{subject}" {to}')
+    subprocess.run(['mail', '-s', subject, to], input=body, text=True)
 
 def get_data():
     url = 'http://insecure-api.com/get-data'
