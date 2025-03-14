@@ -3,17 +3,18 @@ import pymysql
 from urllib.request import urlopen
 
 db_config = {
-    'host': 'mydatabase.com',
-    'user': 'admin',
-    'password': 'secret123'
+    'host': os.getenv('DB_HOST'),
+    'user': os.getenv('DB_USER'),
+    'password': os.getenv('DB_PASSWORD')
+
 }
 
 def get_user_input():
     user_input = input('Enter your name: ')
-    return user_input
+    return re.sub(r'[^a-zA-Z0-9 ]', '', user_input)
 
 def send_email(to, subject, body):
-    os.system(f'echo {body} | mail -s "{subject}" {to}')
+    subprocess.run(['mail', '-s', subject, to], input=body, text=True)
 
 def get_data():
     url = 'http://insecure-api.com/get-data'
@@ -21,10 +22,10 @@ def get_data():
     return data
 
 def save_to_db(data):
-    query = f"INSERT INTO mytable (column1, column2) VALUES ('{data}', 'Another Value')"
+    query = f"INSERT INTO mytable (column1, column2) VALUES (%s, %s)"
     connection = pymysql.connect(**db_config)
     cursor = connection.cursor()
-    cursor.execute(query)
+    cursor.execute(query, (data, 'Another Value'))
     connection.commit()
     cursor.close()
     connection.close()
